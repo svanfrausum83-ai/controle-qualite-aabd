@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1D2A33">
+<title>Contrôle qualité · AABD</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--ink:#1d2a33;--ink-2:#44535c;--muted:#6f7c83;--paper:#f6f4ef;--card:#fff;--line:#e2ded6;--line-2:#eeebe5;--accent:#f07300;--accent-soft:#fdeedf;--good:#2f7d4f;--good-soft:#e6f3ea;--warn:#b97a00;--warn-soft:#fbf1d9;--bad:#b8403a;--bad-soft:#f9e6e4}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.45 "Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.2}h1{font-size:1.3rem}h2{font-size:1.05rem}h3{font-size:.95rem}
+.top{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px}
+.top img{width:28px;height:28px;border-radius:6px}.top b{flex:1}.top button{background:none;border:1px solid #50626b;color:#fff;border-radius:8px;padding:6px 10px}
+main{padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.muted{color:var(--muted)}.small{font-size:.82rem}.hidden{display:none!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;text-decoration:none;color:inherit}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.danger{color:var(--bad)}.btn.small{min-height:36px;padding:0 10px;font-size:.88rem}.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+label.f{display:grid;gap:4px;font-size:.82rem;font-weight:700;color:var(--ink-2);margin-bottom:10px}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;min-height:46px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+textarea{min-height:70px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid2>*{min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 13px;font-weight:700;font-size:.88rem;cursor:pointer}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.pill{display:inline-block;border-radius:99px;padding:2px 9px;font-size:.76rem;font-weight:800;white-space:nowrap}
+.good{background:var(--good-soft);color:var(--good)}.warn{background:var(--warn-soft);color:var(--warn)}.bad{background:var(--bad-soft);color:var(--bad)}.grey{background:#eeebe5;color:var(--ink-2)}
+.tag{font-size:.7rem;font-weight:800;padding:1px 6px;border-radius:5px;background:#eeebe5;color:var(--ink-2)}
+.tag.crit{background:var(--bad-soft);color:var(--bad)}.tag.tech{background:#e3edf5;color:#2c5d84}
+.banner{padding:10px 12px;border-radius:10px;margin-bottom:12px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.banner.warn{background:var(--warn-soft);color:#6d4a00}.banner.bad{background:var(--bad-soft);color:var(--bad)}.banner.info{background:#eeebe5}
+.floors{display:grid;gap:8px}.floor b{font-size:.78rem;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:5px;margin-top:4px}
+.tile{height:50px;border-radius:9px;border:0;display:grid;place-items:center;align-content:center;font-weight:800;font-size:.92rem;background:#ece8e1;color:var(--ink-2);position:relative;line-height:1.05;cursor:pointer}
+.tile small{font-size:.66rem;font-weight:700;opacity:.85}
+.tile.Validé{background:#d7ecdf;color:#1f5a37}.tile.Réserves{background:#f6e6bd;color:#6e4b00}.tile.Refusé{background:#f3cdc9;color:#8d2a25}
+.tile.today{outline:2px solid var(--ink);outline-offset:1px}.tile.vip::after{content:"★";position:absolute;top:-6px;right:-3px;color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.76rem;color:var(--ink-2);margin-top:8px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+.list{display:grid;gap:6px}
+a.row,a.tile{text-decoration:none;color:inherit}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;text-align:left;width:100%;cursor:pointer}
+.zone{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:10px;overflow:hidden}
+.zone-head{display:flex;align-items:center;gap:8px;padding:12px;background:#faf8f4;cursor:pointer}
+.zone-head h3{flex:1}.zone-head .zs{font-weight:800}
+.zone.closed .zone-body{display:none}.zone-body{padding:2px 12px 8px}
+.check{padding:10px 0;border-bottom:1px solid var(--line-2)}.check:last-child{border-bottom:0}
+.check-label{font-weight:700;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.rate{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.rate button{height:48px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:1rem;cursor:pointer}
+.rate .ok.on{background:var(--good);border-color:var(--good);color:#fff}.rate .partiel.on{background:var(--warn);border-color:var(--warn);color:#fff}
+.rate .nc.on{background:var(--bad);border-color:var(--bad);color:#fff}.rate .na.on{background:var(--ink-2);border-color:var(--ink-2);color:#fff}
+.extra{margin-top:8px;display:grid;gap:6px}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap}
+.thumb{position:relative;width:70px;height:70px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb button{position:absolute;top:2px;right:2px;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;width:22px;height:22px;font-size:.75rem}
+.scorebar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--ink);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+.scorebar .big{font-size:1.7rem;font-weight:800;min-width:62px}.scorebar .meta{flex:1;font-size:.8rem;color:#c9d3d8}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:25;display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.nav a{display:grid;place-items:center;padding:8px 2px;text-decoration:none;font-size:.7rem;font-weight:800;color:var(--muted)}.nav a span{font-size:1.25rem}.nav a.active{color:var(--accent)}
+.big-score{font-size:3rem;font-weight:800;line-height:1}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;width:max-content;max-width:92vw}
+#toast div{background:var(--ink);color:#fff;padding:10px 14px;border-radius:10px;margin-top:6px}#toast div.bad{background:var(--bad)}
+.lightbox{position:fixed;inset:0;background:rgba(10,15,20,.9);display:grid;place-items:center;z-index:70;padding:10px}.lightbox img{max-width:100%;max-height:100%}
+table{width:100%;border-collapse:collapse;font-size:.88rem}td{padding:6px 4px;border-bottom:1px solid var(--line-2);vertical-align:top}
+</style>
+</head>
+<body>
+<div class="top"><img src="icon-192.png" alt=""><b id="topTitle">Contrôle qualité</b><button id="who" class="hidden"></button></div>
+<main id="main"><p class="muted">Chargement…</p></main>
+<nav class="nav" id="nav">
+  <a href="#/" data-nav="home"><span>🏠</span>Accueil</a>
+  <a href="#/objet" data-nav="objet"><span>🔎</span>Objet trouvé</a>
+  <a href="#/historique" data-nav="historique"><span>🗂️</span>Mes contrôles</a>
+  <a href="#/reglages" data-nav="reglages"><span>⚙️</span>Réglages</a>
+</nav>
+<div id="toast" aria-live="polite"></div>
+<script src="donnees.js"></script>
+<script>
+"use strict";
+/* Contrôle qualité studios & communs — app GSM (PWA). Données de travail dans le téléphone (IndexedDB),
+   envoi au relais Google Apps Script (Sheet + Drive), lu ensuite par l'exe du PC. */
+const VERSION = "1.0.0";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n, d = 1) => (n === null || n === undefined || Number.isNaN(Number(n)) ? "–" : Number(n).toLocaleString("fr-BE", { maximumFractionDigits: d }));
+const fdate = (iso) => (iso ? `${String(iso).slice(8, 10)}/${String(iso).slice(5, 7)}/${String(iso).slice(0, 4)}` : "–");
+const isoLocal = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const todayISO = () => isoLocal(new Date());
+const nowTime = () => new Date().toTimeString().slice(0, 5);
+const hex = (n) => [...crypto.getRandomValues(new Uint8Array(n))].map((b) => b.toString(16).padStart(2, "0")).join("");
+const stamp = () => { const d = new Date(); return `${isoLocal(d).replace(/-/g, "")}-${d.toTimeString().slice(0, 8).replace(/:/g, "")}`; };
+const RATING_VALUE = { ok: 1, partiel: 0.5, nc: 0 };
+const RATING_LABEL = { ok: "Conforme", partiel: "À reprendre", nc: "Non conforme", na: "N/A" };
+const RESULT_CLASS = { "Validé": "good", "Réserves": "warn", "Refusé": "bad" };
+const resultPill = (r) => (r ? `<span class="pill ${RESULT_CLASS[r] || "grey"}">${esc(r)}</span>` : "");
+
+function toast(msg, bad = false) {
+  const n = document.createElement("div"); n.textContent = msg; if (bad) n.className = "bad";
+  $("#toast").appendChild(n); setTimeout(() => n.remove(), bad ? 6000 : 3000);
+}
+document.addEventListener("click", (e) => {
+  const img = e.target.closest("img[data-zoom]");
+  if (!img) return;
+  const box = document.createElement("div"); box.className = "lightbox"; box.innerHTML = `<img src="${img.src}" alt="">`;
+  box.onclick = () => box.remove(); document.body.appendChild(box);
+});
+
+/* ---------------- stockage local (IndexedDB) ---------------- */
+const Store = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      const req = indexedDB.open("aabd-controle-qualite", 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        for (const [name, key] of [["kv", "k"], ["drafts", "k"], ["outbox", "id"], ["history", "id"]]) if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath: key });
+      };
+      req.onsuccess = () => { this.db = req.result; res(this.db); };
+      req.onerror = () => rej(req.error);
+    });
+  },
+  async tx(store, mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(store, mode); const s = t.objectStore(store); let out;
+      const r = fn(s); if (r) r.onsuccess = () => { out = r.result; };
+      t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error || new Error("Stockage plein ?"));
+    });
+  },
+  get(store, key) { return this.tx(store, "readonly", (s) => s.get(key)); },
+  put(store, val) { return this.tx(store, "readwrite", (s) => s.put(val)); },
+  del(store, key) { return this.tx(store, "readwrite", (s) => s.delete(key)); },
+  all(store) { return this.tx(store, "readonly", (s) => s.getAll()); },
+};
+async function kv(key, fallback) { const r = await Store.get("kv", key); return r ? r.v : fallback; }
+async function setKv(key, v) { await Store.put("kv", { k: key, v }); }
+const defaultSettings = () => ({ url: "", token: "", controllers: [], controller: "", persisted: null });
+async function settings() { return { ...defaultSettings(), ...(await kv("settings", {})) }; }
+async function saveSettings(s) { await setKv("settings", s); }
+
+/* ---------------- configuration (grilles, studios, VIP) ---------------- */
+let CONF = { ...DATA, vip: { date: "", list: [] }, cleaners: [] };
+async function loadConf() {
+  const remote = await kv("config", null);
+  if (remote && remote.grids) CONF = { ...CONF, ...remote, studios: remote.studios || DATA.studios };
+}
+const areas = () => CONF.grids.commonAreas;
+function gridFor(kind, loc) {
+  const g = CONF.grids;
+  if (kind === "studio") return g.studio;
+  const area = areas().find((a) => a.id === loc);
+  if (!area) return null;
+  const extras = (g.commonExtras || {})[area.type] || [];
+  return [{ zone: "Général", items: g.commonBase }].concat(extras.length ? [{ zone: "Spécifique", items: extras }] : []);
+}
+function scoreColor(score) {
+  if (score === null || score === undefined) return "inherit";
+  const t = CONF.grids.thresholds;
+  return score >= t.valid ? "var(--good)" : score >= t.refuse ? "var(--warn)" : "var(--bad)";
+}
+function computeScore(zones, items) {
+  let num = 0, den = 0, rated = 0, total = 0; const critical = [], zoneScores = {};
+  for (const zone of zones) {
+    let zn = 0, zd = 0;
+    for (const it of zone.items) {
+      total++;
+      const rating = items[`${zone.zone}|${it.id}`]?.rating;
+      if (rating) rated++;
+      if (it.tech || !(rating in RATING_VALUE)) continue;
+      zn += it.weight * RATING_VALUE[rating]; zd += it.weight;
+      if (rating === "nc" && it.critical) critical.push(it.label);
+    }
+    zoneScores[zone.zone] = zd ? Math.round((1000 * zn) / zd) / 10 : null; num += zn; den += zd;
+  }
+  const t = CONF.grids.thresholds;
+  const score = den ? Math.round((1000 * num) / den) / 10 : null;
+  const result = score === null ? "" : critical.length || score < t.refuse ? "Refusé" : score < t.valid ? "Réserves" : "Validé";
+  return { score, result, critical, zoneScores, rated, total };
+}
+
+/* ---------------- relais Google ---------------- */
+async function relayGet(params) {
+  const s = await settings();
+  if (!s.url) throw new Error("Relais non configuré (Réglages).");
+  const q = new URLSearchParams({ ...params, token: s.token });
+  let r;
+  try { r = await fetch(`${s.url}?${q}`, { cache: "no-store" }); } catch { throw new Error("Pas de réseau ou relais injoignable."); }
+  const data = await r.json();
+  if (!data.ok) throw new Error(data.error || "Erreur du relais");
+  return data;
+}
+async function relayPost(body) {
+  const s = await settings();
+  if (!s.url) throw new Error("Relais non configuré (Réglages).");
+  let r;
+  try { r = await fetch(s.url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ ...body, token: s.token }) }); }
+  catch { throw new Error("Pas de réseau ou relais injoignable : nouvel essai automatique."); }
+  const data = await r.json();
+  if (!data.ok) throw new Error(data.error || "Erreur du relais");
+  return data;
+}
+async function refreshState(silent = true) {
+  try {
+    const data = await relayGet({ action: "state" });
+    await setKv("state", { last: data.last || {}, at: new Date().toISOString() });
+    if (data.config && data.config.grids) { await setKv("config", data.config); await loadConf(); }
+    return true;
+  } catch (e) { if (!silent) toast(e.message, true); return false; }
+}
+
+/* ---------------- file d'envoi ---------------- */
+let flushing = false, sent = 0;
+async function flush() {
+  if (flushing || !navigator.onLine) return;
+  const s = await settings();
+  if (!s.url) return;
+  flushing = true;
+  try {
+    const items = (await Store.all("outbox")).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    sent = 0;
+    for (const ev of items) {
+      try {
+        await relayPost({ kind: ev.kind, record: ev.record, photos: ev.photos });
+        await Store.del("outbox", ev.id);
+        sent++;
+        const h = await Store.get("history", ev.id);
+        if (h) { h.sent = true; h.sentAt = new Date().toISOString(); await Store.put("history", h); }
+      } catch (e) {
+        ev.tries = (ev.tries || 0) + 1; ev.lastError = e.message; await Store.put("outbox", ev);
+        break;
+      }
+    }
+  } finally { flushing = false; }
+  updateBanner();
+  if (sent && /^#\/(rapport|historique)/.test(location.hash)) route();
+}
+async function enqueue(kind, record, photos, summary) {
+  await Store.put("outbox", { id: record.id, kind, record, photos, createdAt: new Date().toISOString() });
+  await Store.put("history", { ...summary, id: record.id, type: kind, sent: false });
+  flush();
+}
+async function updateBanner() {
+  const box = $("#outboxBanner");
+  if (!box) return;
+  const ob = await Store.all("outbox");
+  if (!ob.length) { box.innerHTML = ""; return; }
+  const last = ob.find((x) => x.lastError);
+  box.innerHTML = `<div class="banner ${last ? "bad" : "warn"}"><span><b>${ob.length} envoi(s) en attente</b>${!navigator.onLine ? "<br>Hors ligne : envoi automatique au retour du réseau." : last ? `<br><span class="small">${esc(last.lastError)}</span>` : ""}</span><button class="btn small" id="retry">Renvoyer</button></div>`;
+  $("#retry").onclick = () => flush();
+}
+window.addEventListener("online", flush);
+
+/* ---------------- photos ---------------- */
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image illisible.")); };
+    img.src = url;
+  });
+}
+const photoName = () => `P${stamp()}-${hex(3)}.jpg`;
+const camInput = `<input type="file" accept="image/*" capture="environment" hidden>`;
+function thumbs(names, dataMap, removable = true) {
+  return names.map((n, i) => `<div class="thumb"><img src="${dataMap[n] || ""}" data-zoom alt="">${removable ? `<button type="button" data-rm="${i}">✕</button>` : ""}</div>`).join("");
+}
+/** Bouton photo : ajoute au tableau `target.photos` (noms) et à `dataMap` (nom → dataURL). */
+function bindPhotos(box, target, dataMap, onChange) {
+  const input = box.querySelector("input[type=file]");
+  box.querySelector("[data-cam]").onclick = () => input.click();
+  input.onchange = async () => {
+    for (const file of input.files) {
+      try { const data = await compressImage(file); const n = photoName(); dataMap[n] = data; (target.photos ||= []).push(n); }
+      catch (e) { toast(e.message, true); }
+    }
+    input.value = ""; onChange();
+  };
+  box.querySelector(".thumbs").onclick = (e) => {
+    const b = e.target.closest("[data-rm]"); if (!b) return;
+    const [n] = target.photos.splice(Number(b.dataset.rm), 1); delete dataMap[n]; onChange();
+  };
+}
+
+/* ---------------- écrans ---------------- */
+const main = () => $("#main");
+async function route() {
+  const s = await settings();
+  const hash = location.hash.replace(/^#\/?/, "");
+  const [path, query] = hash.split("?");
+  const parts = path.split("/").map(decodeURIComponent);
+  const params = Object.fromEntries(new URLSearchParams(query || ""));
+  $$("[data-nav]").forEach((a) => a.classList.toggle("active", a.dataset.nav === (parts[0] || "home")));
+  $("#nav").classList.toggle("hidden", parts[0] === "controle");
+  $("#who").classList.toggle("hidden", !s.controller);
+  $("#who").textContent = s.controller ? `👤 ${s.controller}` : "";
+  window.scrollTo(0, 0);
+  $("#topTitle").textContent = "Contrôle qualité";
+  if (parts[0] !== "reglages" && (!s.url || !s.controller)) return pageSetup(s);
+  const pages = { "": pageHome, controle: () => pageControl(parts[1], parts[2], params), rapport: () => pageReport(parts[1]), objet: () => pageLost(params), historique: pageHistory, reglages: pageSettings };
+  try { await (pages[parts[0]] || pageHome)(); } catch (e) { main().innerHTML = `<div class="banner bad">${esc(e.message)}</div>`; }
+}
+window.addEventListener("hashchange", route);
+$("#who").onclick = () => { location.hash = "#/reglages"; };
+
+async function pageSetup(s) {
+  if (!s.url) {
+    main().innerHTML = `<div class="card"><h1>Bienvenue</h1><p>Pour relier ce GSM au registre des contrôles, collez le <b>code de configuration</b> reçu par mail (« [CONFIG] Contrôle qualité »).</p><a class="btn primary block" href="#/reglages">Ouvrir les réglages</a></div>`;
+    return;
+  }
+  main().innerHTML = `<div class="card"><h1>Qui contrôle ?</h1><p class="muted small">Votre nom apparaîtra sur chaque contrôle.</p>
+    <div class="list">${s.controllers.map((n) => `<button class="row" data-name="${esc(n)}"><b>${esc(n)}</b><span>›</span></button>`).join("")}</div>
+    <label class="f" style="margin-top:12px">Ajouter un nom<input type="text" id="newName" placeholder="Prénom Nom"></label><button class="btn dark block" id="addName">Ajouter et continuer</button></div>`;
+  const choose = async (n) => { const x = await settings(); x.controller = n; if (!x.controllers.includes(n)) x.controllers.push(n); await saveSettings(x); location.hash = "#/"; route(); };
+  $$("[data-name]").forEach((b) => (b.onclick = () => choose(b.dataset.name)));
+  $("#addName").onclick = () => { const n = $("#newName").value.trim(); if (n) choose(n); else toast("Indiquez un nom.", true); };
+}
+
+async function pageHome() {
+  const st = (await kv("state", { last: {} })) || { last: {} };
+  const history = (await Store.all("history")).sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+  const today = todayISO();
+  const mineToday = new Set(history.filter((h) => h.date === today && h.kind === "studio").map((h) => h.location));
+  // Mes contrôles pas encore visibles dans l'état du relais priment (envoi en attente).
+  const last = { ...st.last };
+  for (const h of [...history].reverse()) if (h.type === "inspection") last[`${h.kind}|${h.location}`] = { ...h };
+  const vip = new Set(CONF.vip && CONF.vip.date === today ? CONF.vip.list : []);
+  const floors = {};
+  for (const s of CONF.studios) (floors[s.floor] ||= []).push(s);
+  const recheck = Object.entries(last).filter(([, v]) => v.result === "Refusé").map(([k, v]) => ({ key: k, ...v }));
+  main().innerHTML = `<div id="outboxBanner"></div>
+    ${recheck.length ? `<div class="card"><div class="card-head"><h2>À recontrôler (refusés)</h2></div><div class="list">${recheck.map((r) => { const [kind, loc] = r.key.split("|"); return `<a class="row" href="#/controle/${kind}/${encodeURIComponent(loc)}?parent=${esc(r.id)}"><span><b>${esc(kind === "studio" ? "Studio " + loc : r.label || loc)}</b><br><span class="small muted">${fdate(r.date)} · ${fmt(r.score)}</span></span><span class="pill bad">Recontrôler</span></a>`; }).join("")}</div></div>` : ""}
+    <div class="card"><div class="card-head"><h2>Studios</h2><button class="btn small" id="refresh">↻ Actualiser</button></div>
+      <p class="small muted" style="margin:0">Touchez un studio pour le contrôler. ${st.at ? `Couleurs mises à jour le ${fdate(st.at.slice(0, 10))} à ${new Date(st.at).toTimeString().slice(0, 5)}.` : ""}</p>
+      <div class="floors" style="margin-top:8px">${Object.keys(floors).sort((a, b) => b - a).map((f) => `<div class="floor"><b>Étage ${f}</b><div class="tiles">${floors[f].map((s) => { const l = last[`studio|${s.studio}`]; return `<a class="tile ${l ? esc(l.result) : ""} ${mineToday.has(s.studio) ? "today" : ""} ${vip.has(s.studio) ? "vip" : ""}" href="#/controle/studio/${s.studio}${vip.has(s.studio) ? "?flags=VIP" : ""}">${s.studio}<small>${l && l.score !== undefined && l.score !== "" ? fmt(l.score, 0) : s.type}</small></a>`; }).join("")}</div></div>`).join("")}</div>
+      <div class="legend"><span><i style="background:#d7ecdf"></i>Validé</span><span><i style="background:#f6e6bd"></i>Réserves</span><span><i style="background:#f3cdc9"></i>Refusé</span><span><i style="background:#ece8e1"></i>Pas de contrôle</span>${vip.size ? "<span>★ VIP du jour</span>" : ""}</div></div>
+    <div class="card"><div class="card-head"><h2>Parties communes</h2></div><div class="list">${areas().map((a) => { const l = last[`commun|${a.id}`]; return `<a class="row" href="#/controle/commun/${encodeURIComponent(a.id)}"><span><b>${esc(a.label)}</b><br><span class="small muted">${l ? `${fdate(l.date)} · ${fmt(l.score)}` : "Jamais contrôlé"}</span></span>${l ? resultPill(l.result) : ""}</a>`; }).join("")}</div></div>`;
+  $("#refresh").onclick = async () => { if (await refreshState(false)) { toast("Plan actualisé."); route(); } };
+  updateBanner();
+}
+
+async function pageControl(kind, loc, params) {
+  const zones = gridFor(kind, loc);
+  const studio = kind === "studio" ? CONF.studios.find((s) => s.studio === loc) : null;
+  const area = kind === "commun" ? areas().find((a) => a.id === loc) : null;
+  if (!zones || (!studio && !area)) throw new Error("Lieu inconnu.");
+  const s = await settings();
+  const title = studio ? `Studio ${studio.studio}` : area.label;
+  $("#topTitle").textContent = title;
+  const key = `${kind}|${loc}`;
+  const fresh = () => ({ k: key, date: todayISO(), time: nowTime(), cleanType: params.parent ? "Reclean" : kind === "studio" ? "Départ" : "",
+    cleaner: "", flags: params.flags ? params.flags.split(",") : [], items: {}, comment: "", techComment: "", photos: [], data: {}, parentId: params.parent || "" });
+  let draft = await Store.get("drafts", key);
+  const resumed = !!draft && Object.keys(draft.items || {}).length > 0;
+  if (!draft || (params.parent && draft.parentId !== params.parent)) draft = fresh();
+  draft.cleaner ||= await kv("lastCleaner", "");
+  let saveTimer;
+  const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => Store.put("drafts", draft).catch((e) => toast("Brouillon non enregistré : " + e.message, true)), 250); };
+  const closed = new Set();
+
+  const itemHtml = (zone, it) => {
+    const k = `${zone.zone}|${it.id}`, e = draft.items[k] || {};
+    const open = e.rating === "nc" || e.rating === "partiel" || e.comment || (e.photos || []).length;
+    return `<div class="check" data-key="${esc(k)}"><div class="check-label">${esc(it.label)} ${it.critical ? '<span class="tag crit">Critique</span>' : ""}${it.tech ? '<span class="tag tech">Technique</span>' : ""}</div>
+      <div class="rate">${[["ok", "✓"], ["partiel", "~"], ["nc", "✗"], ["na", "N/A"]].map(([r, l]) => `<button type="button" class="${r} ${e.rating === r ? "on" : ""}" data-r="${r}" aria-label="${RATING_LABEL[r]}">${l}</button>`).join("")}<button type="button" data-cam aria-label="Photo">📷</button></div>${camInput}
+      <div class="extra ${open ? "" : "hidden"}"><input type="text" class="cmt" placeholder="Précision (ex. cheveux sous le lit)" value="${esc(e.comment || "")}"><div class="thumbs">${thumbs(e.photos || [], draft.data)}</div></div></div>`;
+  };
+  const zoneHtml = (zone) => {
+    const done = zone.items.filter((i) => draft.items[`${zone.zone}|${i.id}`]?.rating).length;
+    const zs = computeScore([zone], draft.items).zoneScores[zone.zone];
+    return `<section class="zone ${closed.has(zone.zone) ? "closed" : ""}" data-zone="${esc(zone.zone)}"><div class="zone-head"><h3>${esc(zone.zone)}</h3><span class="small muted">${done}/${zone.items.length}</span><span class="zs" style="color:${scoreColor(zs)}">${zs === null ? "" : fmt(zs)}</span><button type="button" class="btn small" data-allok>Tout ✓</button></div><div class="zone-body">${zone.items.map((it) => itemHtml(zone, it)).join("")}</div></section>`;
+  };
+  const updateScore = () => {
+    const sc = computeScore(zones, draft.items);
+    $("#liveScore").textContent = sc.score === null ? "–" : fmt(sc.score);
+    $("#liveScore").style.color = sc.score === null ? "#fff" : { "Validé": "#8fe0ad", "Réserves": "#ffd27a", "Refusé": "#ff9b92" }[sc.result];
+    $("#liveMeta").innerHTML = `${sc.result ? `<b>${sc.result}</b> · ` : ""}${sc.rated}/${sc.total} points${sc.critical.length ? ` · <b style="color:#ff9b92">${sc.critical.length} critique(s)</b>` : ""}`;
+    for (const z of zones) {
+      const node = $(`.zone[data-zone="${CSS.escape(z.zone)}"]`);
+      node.querySelector(".zone-head .muted").textContent = `${z.items.filter((i) => draft.items[`${z.zone}|${i.id}`]?.rating).length}/${z.items.length}`;
+      const zs = sc.zoneScores[z.zone], zn = node.querySelector(".zs"); zn.textContent = zs === null ? "" : fmt(zs); zn.style.color = scoreColor(zs);
+    }
+  };
+  const bindCheck = (node) => {
+    const k = node.dataset.key;
+    const entry = () => (draft.items[k] ||= { rating: "", comment: "", photos: [] });
+    const rerender = () => { const [zn, id] = k.split("|"); const z = zones.find((x) => x.zone === zn); node.outerHTML = itemHtml(z, z.items.find((i) => i.id === id)); bindCheck($(`.check[data-key="${CSS.escape(k)}"]`)); };
+    node.querySelectorAll("[data-r]").forEach((b) => (b.onclick = () => {
+      const e = entry(); e.rating = e.rating === b.dataset.r ? "" : b.dataset.r; save(); rerender(); updateScore();
+    }));
+    node.querySelector(".cmt").oninput = (ev) => { entry().comment = ev.target.value; save(); };
+    bindPhotos(node, entry(), draft.data, () => { save(); rerender(); });
+  };
+  const bindZone = (zn) => {
+    const name = zn.dataset.zone;
+    zn.querySelector(".zone-head").onclick = (e) => { if (e.target.closest("[data-allok]")) return; zn.classList.toggle("closed"); zn.classList.contains("closed") ? closed.add(name) : closed.delete(name); };
+    zn.querySelector("[data-allok]").onclick = () => {
+      const z = zones.find((x) => x.zone === name);
+      for (const it of z.items) { const e = (draft.items[`${z.zone}|${it.id}`] ||= { rating: "", comment: "", photos: [] }); if (!e.rating) e.rating = "ok"; }
+      save(); zn.outerHTML = zoneHtml(z); const n = $(`.zone[data-zone="${CSS.escape(name)}"]`); $$(".check", n).forEach(bindCheck); bindZone(n); updateScore();
+    };
+  };
+
+  main().innerHTML = `${resumed ? `<div class="banner info"><span>Contrôle en cours repris.</span><button class="btn small danger" id="reset">Recommencer</button></div>` : ""}
+    ${params.parent ? `<div class="banner warn">Recontrôle après reclean.</div>` : ""}
+    <div class="card"><p class="small muted" style="margin:0 0 8px">${studio ? `${esc(studio.type)} · étage ${studio.floor}` : "Partie commune"} · contrôleur : <b>${esc(s.controller)}</b></p>
+      <div class="grid2"><label class="f">Date<input type="date" id="fDate" value="${esc(draft.date)}"></label><label class="f">Heure<input type="time" id="fTime" value="${esc(draft.time)}"></label></div>
+      <label class="f">Type de nettoyage<select id="fClean"><option value="">—</option>${CONF.cleanTypes.map((t) => `<option ${draft.cleanType === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>
+      <label class="f">Agent / prestataire<input type="text" id="fCleaner" list="cl" value="${esc(draft.cleaner)}" placeholder="ex. HCS – prénom"><datalist id="cl">${["HCS", ...(CONF.cleaners || [])].map((c) => `<option value="${esc(c)}">`).join("")}</datalist></label>
+      <div class="chips" id="fFlags">${CONF.flags.map((f) => `<button type="button" class="chip ${draft.flags.includes(f) ? "on" : ""}" data-flag="${esc(f)}">${esc(f)}</button>`).join("")}</div></div>
+    <div id="zones">${zones.map(zoneHtml).join("")}</div>
+    <div class="card"><label class="f">Commentaire général<textarea id="fComment">${esc(draft.comment)}</textarea></label>
+      <label class="f">Signalement technique (maintenance)<textarea id="fTech">${esc(draft.techComment)}</textarea></label>
+      <div id="gen"><button type="button" class="btn" data-cam>📷 Photos générales</button>${camInput}<div class="thumbs" style="margin-top:8px">${thumbs(draft.photos, draft.data)}</div></div></div>
+    <div class="btns" style="margin-bottom:80px"><a class="btn" href="#/">← Quitter (brouillon gardé)</a></div>
+    <div class="scorebar"><span class="big" id="liveScore">–</span><span class="meta" id="liveMeta"></span><button class="btn primary" id="saveCtrl">Enregistrer</button></div>`;
+  $$(".check").forEach(bindCheck); $$(".zone").forEach(bindZone);
+  const field = (id, prop, ev = "input") => ($(id)[`on${ev}`] = (e) => { draft[prop] = e.target.value; save(); });
+  field("#fDate", "date"); field("#fTime", "time"); field("#fClean", "cleanType", "change"); field("#fCleaner", "cleaner"); field("#fComment", "comment"); field("#fTech", "techComment");
+  $("#fFlags").onclick = (e) => { const c = e.target.closest("[data-flag]"); if (!c) return; const f = c.dataset.flag; draft.flags = draft.flags.includes(f) ? draft.flags.filter((x) => x !== f) : [...draft.flags, f]; c.classList.toggle("on"); save(); };
+  const gen = $("#gen"); bindPhotos(gen, draft, draft.data, () => { save(); gen.querySelector(".thumbs").innerHTML = thumbs(draft.photos, draft.data); });
+  $("#reset")?.addEventListener("click", async () => { if (confirm("Effacer ce contrôle en cours ?")) { await Store.del("drafts", key); route(); } });
+  updateScore();
+
+  $("#saveCtrl").onclick = async () => {
+    const sc = computeScore(zones, draft.items);
+    if (!sc.rated) return toast("Évaluez au moins un point.", true);
+    if (sc.total - sc.rated && !confirm(`${sc.total - sc.rated} point(s) non évalué(s), ignorés dans le score. Enregistrer quand même ?`)) return;
+    const naked = Object.values(draft.items).filter((e) => e.rating === "nc" && !e.comment && !(e.photos || []).length).length;
+    if (naked && !confirm(`${naked} non-conformité(s) sans précision ni photo. Enregistrer quand même ?`)) return;
+    const id = `C${draft.date.replace(/-/g, "")}-${stamp().slice(9)}-${hex(2)}`;
+    const items = [];
+    for (const z of zones) for (const it of z.items) {
+      const e = draft.items[`${z.zone}|${it.id}`];
+      if (e && (e.rating || e.comment || (e.photos || []).length)) items.push({ id: `${z.zone}|${it.id}`, zone: z.zone, label: it.label, rating: e.rating || "", comment: e.comment || "", photos: e.photos || [] });
+    }
+    const used = new Set([...draft.photos, ...items.flatMap((i) => i.photos)]);
+    const photos = [...used].filter((n) => draft.data[n]).map((n) => ({ name: n, data: draft.data[n].split(",")[1] }));
+    const record = { id, kind, location: loc, label: title, roomType: studio ? studio.type : area.type, floor: studio ? studio.floor : area.floor,
+      date: draft.date, time: draft.time, cleanType: draft.cleanType, cleaner: draft.cleaner.trim(), flags: draft.flags, controllerName: s.controller,
+      comment: draft.comment, techComment: draft.techComment, parentId: draft.parentId, photos: draft.photos.filter((n) => draft.data[n]), items,
+      score: sc.score, result: sc.result, critical: sc.critical, zoneScores: sc.zoneScores, createdAt: new Date().toISOString(), device: "gsm", appVersion: VERSION };
+    try {
+      await enqueue("inspection", record, photos, { kind, location: loc, label: title, date: draft.date, time: draft.time, score: sc.score, result: sc.result,
+        defects: items.filter((i) => i.rating === "nc" || i.rating === "partiel").map((i) => ({ zone: i.zone, label: i.label, rating: i.rating, comment: i.comment })) });
+      await Store.del("drafts", key);
+      if (draft.cleaner) await setKv("lastCleaner", draft.cleaner.trim());
+      toast(`Enregistré : ${fmt(sc.score)} – ${sc.result}`);
+      location.hash = `#/rapport/${id}`;
+    } catch (e) { toast("Enregistrement impossible : " + e.message, true); }
+  };
+}
+
+async function pageReport(id) {
+  const h = await Store.get("history", id);
+  if (!h) throw new Error("Contrôle introuvable sur ce GSM.");
+  main().innerHTML = `<div id="outboxBanner"></div><div class="card"><h1>${esc(h.label)}</h1><p class="muted small">${fdate(h.date)} · ${esc(h.time)}</p>
+    <div class="big-score" style="color:${scoreColor(h.score)}">${fmt(h.score)}</div>${resultPill(h.result)}
+    <p class="small">${h.sent ? "✓ Envoyé au registre" : "⏳ En attente d'envoi"}</p></div>
+    <div class="card"><h2>Points à reprendre (${h.defects.length})</h2>${h.defects.length ? `<table>${h.defects.map((d) => `<tr><td><b>${esc(d.label)}</b><br><span class="small muted">${esc(d.zone)}${d.comment ? " · " + esc(d.comment) : ""}</span></td><td><span class="pill ${d.rating === "nc" ? "bad" : "warn"}">${RATING_LABEL[d.rating]}</span></td></tr>`).join("")}</table>` : `<p class="muted">Aucun défaut. ✓</p>`}</div>
+    <div class="btns">${h.result === "Refusé" ? `<a class="btn primary" href="#/controle/${h.kind}/${encodeURIComponent(h.location)}?parent=${esc(h.id)}">Recontrôler après reclean</a>` : ""}<a class="btn" href="#/">Retour au plan</a><a class="btn" href="#/objet?location=${encodeURIComponent(h.kind === "studio" ? h.location : h.label)}">🔎 Objet trouvé</a></div>`;
+  updateBanner();
+}
+
+async function pageLost(params) {
+  const s = await settings();
+  const draft = { photos: [] }, data = {};
+  const places = [...CONF.studios.map((x) => x.studio), ...areas().map((a) => a.label)];
+  main().innerHTML = `<div id="outboxBanner"></div><div class="card"><h1>Objet trouvé</h1><p class="small muted">Enregistrer l'objet avec une photo, puis le déposer à la réception.</p>
+    <label class="f">Date<input type="date" id="lDate" value="${todayISO()}"></label>
+    <label class="f">Studio / lieu<input type="text" id="lLoc" list="pl" value="${esc(params.location || "")}"><datalist id="pl">${places.map((p) => `<option value="${esc(p)}">`).join("")}</datalist></label>
+    <label class="f">Objet<input type="text" id="lDesc" placeholder="ex. chargeur blanc dans la prise près du lit"></label>
+    <label class="f">Commentaire<input type="text" id="lCmt"></label>
+    <div id="lPh"><button type="button" class="btn" data-cam>📷 Photo</button>${camInput}<div class="thumbs" style="margin-top:8px"></div></div>
+    <button class="btn primary block" id="lSave" style="margin-top:12px">Enregistrer</button></div>`;
+  const box = $("#lPh"); bindPhotos(box, draft, data, () => { box.querySelector(".thumbs").innerHTML = thumbs(draft.photos, data); });
+  $("#lSave").onclick = async () => {
+    const loc = $("#lLoc").value.trim(), desc = $("#lDesc").value.trim();
+    if (!loc || !desc) return toast("Indiquez le lieu et l'objet.", true);
+    const date = $("#lDate").value || todayISO();
+    const id = `O${date.replace(/-/g, "")}-${stamp().slice(9)}-${hex(2)}`;
+    const record = { id, date, location: loc, description: desc, foundBy: s.controller, comment: $("#lCmt").value.trim(), photos: draft.photos, createdAt: new Date().toISOString() };
+    await enqueue("lost", record, draft.photos.map((n) => ({ name: n, data: data[n].split(",")[1] })), { kind: "lost", location: loc, label: `Objet : ${desc}`, date, time: nowTime(), score: null, result: "", defects: [] });
+    toast("Objet enregistré — à déposer à la réception."); location.hash = "#/historique";
+  };
+  updateBanner();
+}
+
+async function pageHistory() {
+  const list = (await Store.all("history")).sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time)).slice(0, 60);
+  main().innerHTML = `<div id="outboxBanner"></div><div class="card"><h1>Mes contrôles</h1><p class="small muted">Sur ce GSM. Le tableau de bord complet est sur le PC.</p>
+    <div class="list">${list.map((h) => `<a class="row" href="${h.type === "lost" ? "#/historique" : `#/rapport/${h.id}`}"><span><b>${esc(h.label)}</b><br><span class="small muted">${fdate(h.date)} ${esc(h.time)} · ${h.sent ? "✓ envoyé" : "⏳ en attente"}</span></span>${h.score !== null && h.score !== undefined ? `<span><b style="color:${scoreColor(h.score)}">${fmt(h.score)}</b> ${resultPill(h.result)}</span>` : ""}</a>`).join("") || '<p class="muted">Aucun contrôle encore.</p>'}</div></div>`;
+  updateBanner();
+}
+
+async function pageSettings() {
+  const s = await settings();
+  const ob = await Store.all("outbox");
+  $("#topTitle").textContent = "Réglages";
+  main().innerHTML = `<div class="card"><h2>Contrôleur</h2><p class="small muted">Nom utilisé pour les contrôles de ce GSM.</p>
+      <div class="list">${s.controllers.map((n) => `<div class="row"><button class="chip ${n === s.controller ? "on" : ""}" data-pick="${esc(n)}">${esc(n)}</button><button class="btn small danger" data-del="${esc(n)}">Retirer</button></div>`).join("") || '<p class="muted small">Aucun nom.</p>'}</div>
+      <label class="f" style="margin-top:10px">Ajouter un nom<input type="text" id="addN" placeholder="Prénom Nom"></label><button class="btn" id="addBtn">Ajouter</button></div>
+    <div class="card"><h2>Liaison au registre</h2>
+      <label class="f">Code de configuration (reçu par mail)<input type="text" id="code" placeholder="AABD-CQ|https://…|…"></label>
+      <div class="btns"><button class="btn dark" id="apply">Enregistrer</button><button class="btn" id="test">Tester la connexion</button></div>
+      <p class="small muted">${s.url ? "✓ Relais configuré." : "Relais non configuré."}</p>
+      <p class="small">${ob.length ? `<b>${ob.length} envoi(s) en attente</b> <button class="btn small" id="retry2">Renvoyer</button>` : "Aucun envoi en attente."}</p></div>
+    <div class="card small muted">Version ${VERSION} · données de travail stockées sur ce GSM jusqu'à l'envoi.</div>`;
+  $$("[data-pick]").forEach((b) => (b.onclick = async () => { s.controller = b.dataset.pick; await saveSettings(s); toast(`Contrôleur : ${s.controller}`); route(); }));
+  $$("[data-del]").forEach((b) => (b.onclick = async () => { s.controllers = s.controllers.filter((n) => n !== b.dataset.del); if (s.controller === b.dataset.del) s.controller = ""; await saveSettings(s); route(); }));
+  $("#addBtn").onclick = async () => { const n = $("#addN").value.trim(); if (!n) return; if (!s.controllers.includes(n)) s.controllers.push(n); s.controller ||= n; await saveSettings(s); route(); };
+  $("#apply").onclick = async () => {
+    const parts = $("#code").value.trim().split("|");
+    if (parts.length !== 3 || parts[0] !== "AABD-CQ" || !/^https:\/\/script\.google\.com\//.test(parts[1])) return toast("Code de configuration non reconnu.", true);
+    s.url = parts[1]; s.token = parts[2]; await saveSettings(s); toast("Configuration enregistrée."); await refreshState(); route();
+  };
+  $("#test").onclick = async () => {
+    try { const r = await relayPost({ kind: "ping" }); toast(`Connexion OK (${r.account || "relais"}).`); await refreshState(); }
+    catch (e) { toast("Échec : " + e.message, true); }
+  };
+  $("#retry2")?.addEventListener("click", () => flush().then(route));
+}
+
+/* ---------------- démarrage ---------------- */
+(async function start() {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  try {
+    const s = await settings();
+    if (s.persisted === null && navigator.storage && navigator.storage.persist) { s.persisted = await navigator.storage.persist(); await saveSettings(s); }
+  } catch { /* facultatif */ }
+  await loadConf();
+  await route();
+  flush();
+  refreshState().then((ok) => { if (ok && (location.hash === "" || location.hash === "#/")) route(); });
+  setInterval(flush, 60000);
+})();
+</script>
+</body>
+</html>
