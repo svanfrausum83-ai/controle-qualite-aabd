@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F07300">
+<title>Objets trouvés · AABD</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--ink:#1d2a33;--ink-2:#44535c;--muted:#6f7c83;--paper:#f6f4ef;--line:#e2ded6;--accent:#f07300;--good:#2f7d4f;--good-soft:#e6f3ea;--warn:#b97a00;--warn-soft:#fbf1d9;--bad:#b8403a;--bad-soft:#f9e6e4}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.45 "Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent;padding-bottom:30px}
+button,input,textarea{font:inherit;color:inherit}
+h1,h2{margin:0 0 8px;line-height:1.2}h1{font-size:1.35rem}h2{font-size:1.1rem}
+.top{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px}
+.top b{flex:1;font-size:1.05rem}.top img{width:30px;height:30px;border-radius:7px}
+.langs{display:flex;gap:4px}.langs{flex-wrap:wrap;justify-content:flex-end;max-width:62%}.langs button{border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;border-radius:7px;padding:4px 6px;font-size:.76rem;font-weight:700}
+.langs button.on{background:#fff;color:var(--accent)}
+main{padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.muted{color:var(--muted)}.small{font-size:.85rem}.hidden{display:none!important}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:800;cursor:pointer;width:100%;font-size:1.02rem;text-decoration:none;color:inherit}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.big{min-height:120px;font-size:1.3rem;flex-direction:column}.btn.big span{font-size:2.6rem}
+.btn:disabled{opacity:.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choice{min-height:78px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:700;font-size:.88rem;display:grid;place-items:center;text-align:center;padding:6px;cursor:pointer;line-height:1.15}
+.choice span{font-size:1.6rem;display:block}
+.choice.on{border-color:var(--accent);background:#fdeedf}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 10px}
+.tile{height:48px;border-radius:10px;border:2px solid var(--line);background:#fff;font-weight:800;cursor:pointer}
+.tile.on{border-color:var(--accent);background:var(--accent);color:#fff}
+.floor{font-size:.8rem;font-weight:800;color:var(--muted);margin-top:6px}
+input[type=text],textarea{width:100%;min-height:52px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+label.f{display:grid;gap:5px;font-weight:700;font-size:.9rem;margin-bottom:10px}
+.photo{width:100%;border-radius:12px;max-height:300px;object-fit:cover}
+.steps{display:flex;gap:6px;margin-bottom:12px}.steps i{flex:1;height:6px;border-radius:9px;background:var(--line)}.steps i.on{background:var(--accent)}
+.banner{padding:12px;border-radius:12px;margin-bottom:12px;font-weight:700}
+.banner.warn{background:var(--warn-soft);color:#6d4a00}.banner.bad{background:var(--bad-soft);color:var(--bad)}.banner.good{background:var(--good-soft);color:var(--good)}
+.item{display:flex;gap:10px;align-items:center;border-bottom:1px solid #eeebe5;padding:9px 0}.item:last-child{border:0}
+.item img{width:52px;height:52px;border-radius:8px;object-fit:cover;background:#eee}
+.item div{flex:1}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;width:max-content;max-width:92vw}
+#toast div{background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;margin-top:6px}#toast div.bad{background:var(--bad)}
+</style>
+</head>
+<body>
+<div class="top"><img src="icon-192.png" alt=""><b id="title">Objets trouvés</b><div class="langs" id="langs"></div></div>
+<main id="main"></main>
+<div id="toast" aria-live="polite"></div>
+<script>
+"use strict";
+/* Objets trouvés — app GSM des femmes de chambre (PWA). Déclaration avec photo, envoyée au relais Google,
+   puis importée par l'exe du PC (écran « Objets trouvés »). File d'attente hors ligne en IndexedDB. */
+const VERSION = "1.0.0";
+const STUDIOS = {2:[201,202,203,204,205,206,207,208,209,210,211,212,214,215,217],3:[301,302,303,304,305,306,307,308,309,310,311,312,314,315,316,317,318,320,322,324,326],4:[401,402,403,404,405,406,407,408,409,410,411,412,414,415,416,417,418,420,422,424,426],5:[501,502,503,504,505,506,507,508,509,510,511,512,514,515,516,517,518,520,522,524,526],6:[601,602,603,604,605,606,607,608,609,610,611,612,614,615,616,617,618,620,622,624,626],7:[701,702,703,704,705,706,707,708,709,710,711,712,714,715,716,717,718,720,722,724,726]};
+const AREAS = ["Lobby & réception","Salle petit-déjeuner","Salle de fitness","Laverie","Couloir","Ascenseur","Escaliers","Toilettes communes","Extérieur & abords","Autre"];
+// Catégories : libellé français = celui de l'exe (LOST_CATEGORIES), le reste est traduit à l'écran.
+const CATS = [
+  ["👕","Vêtement / chaussures","Clothes / shoes","Roupa / sapatos","Haine / încălțăminte","Одежда / обувь","Одяг / взуття"],
+  ["📱","Téléphone / chargeur","Phone / charger","Telemóvel / carregador","Telefon / încărcător","Телефон / зарядка","Телефон / зарядка"],
+  ["💻","Ordinateur / tablette","Laptop / tablet","Computador / tablet","Laptop / tabletă","Ноутбук / планшет","Ноутбук / планшет"],
+  ["💍","Bijou / montre","Jewellery / watch","Joia / relógio","Bijuterie / ceas","Украшение / часы","Прикраса / годинник"],
+  ["👓","Lunettes","Glasses","Óculos","Ochelari","Очки","Окуляри"],
+  ["🪪","Papiers / carte / passeport","ID / card / passport","Documentos / cartão","Acte / card / pașaport","Документы / карта / паспорт","Документи / картка / паспорт"],
+  ["💶","Argent / portefeuille","Money / wallet","Dinheiro / carteira","Bani / portofel","Деньги / кошелёк","Гроші / гаманець"],
+  ["🔑","Clés","Keys","Chaves","Chei","Ключи","Ключі"],
+  ["🧸","Jouet / doudou","Toy / cuddly toy","Brinquedo / peluche","Jucărie","Игрушка","Іграшка"],
+  ["🧴","Trousse de toilette / médicaments","Toiletries / medicine","Necessaire / medicamentos","Trusă / medicamente","Косметичка / лекарства","Косметичка / ліки"],
+  ["🎒","Sac / bagage","Bag / luggage","Saco / mala","Geantă / bagaj","Сумка / багаж","Сумка / багаж"],
+  ["❓","Autre","Other","Outro","Altceva","Другое","Інше"]];
+const VALUABLE = new Set(["Téléphone / chargeur","Ordinateur / tablette","Bijou / montre","Papiers / carte / passeport","Argent / portefeuille"]);
+const SPOTS = [
+  ["🛏️","Lit","Bed","Cama","Pat","Кровать","Ліжко"],["🚿","Salle de bain","Bathroom","Casa de banho","Baie","Ванная","Ванна кімната"],["🍳","Cuisine / frigo","Kitchen / fridge","Cozinha / frigorífico","Bucătărie / frigider","Кухня / холодильник","Кухня / холодильник"],
+  ["🚪","Placard / armoire","Wardrobe","Armário","Dulap","Шкаф","Шафа"],["🔐","Coffre-fort","Safe","Cofre","Seif","Сейф","Сейф"],["🪑","Table / bureau","Table / desk","Mesa / secretária","Masă / birou","Стол","Стіл"],
+  ["🔌","Prise / chargeur","Socket","Tomada","Priză","Розетка","Розетка"],["❓","Autre","Other","Outro","Altul","Другое","Інше"]];
+const LANGS = ["fr","en","pt","ro","ru","uk"];
+const T = {
+  title:["Objets trouvés","Lost & found","Objetos achados","Obiecte găsite","Найденные вещи","Знайдені речі"],
+  found:["J'ai trouvé un objet","I found an item","Encontrei um objeto","Am găsit un obiect","Я нашла вещь","Я знайшла річ"],
+  photo:["1. Photo de l'objet","1. Photo of the item","1. Foto do objeto","1. Poza obiectului","1. Фото вещи","1. Фото речі"],
+  take:["📷 Prendre la photo","📷 Take the photo","📷 Tirar a foto","📷 Fă poza","📷 Сделать фото","📷 Зробити фото"],
+  retake:["📷 Reprendre la photo","📷 Retake","📷 Tirar outra","📷 Refă poza","📷 Переснять","📷 Переробити фото"],
+  nophoto:["Continuer sans photo","Continue without photo","Continuar sem foto","Continuă fără poză","Продолжить без фото","Продовжити без фото"],
+  where:["2. Où ?","2. Where?","2. Onde?","2. Unde?","2. Где?","2. Де?"],
+  studio:["Studio","Studio","Estúdio","Studio","Студия","Студія"],
+  floor:["Étage","Floor","Piso","Etaj","Этаж","Поверх"],
+  other:["Autre endroit","Other place","Outro lugar","Alt loc","Другое место","Інше місце"],
+  spot:["Où dans le studio ?","Where in the studio?","Onde no estúdio?","Unde în studio?","Где в студии?","Де в студії?"],
+  what:["3. Quel objet ?","3. What item?","3. Que objeto?","3. Ce obiect?","3. Какая вещь?","3. Яка річ?"],
+  desc:["Détail (couleur, marque…) — facultatif","Details (colour, brand…) — optional","Detalhes (cor, marca…) — opcional","Detalii (culoare, marcă…) — opțional","Подробности (цвет, марка…) — необязательно","Деталі (колір, марка…) — необов'язково"],
+  check:["4. Vérifier et envoyer","4. Check and send","4. Verificar e enviar","4. Verifică și trimite","4. Проверить и отправить","4. Перевірити й надіслати"],
+  send:["✓ Envoyer","✓ Send","✓ Enviar","✓ Trimite","✓ Отправить","✓ Надіслати"],
+  next:["Suivant →","Next →","Seguinte →","Următorul →","Далее →","Далі →"],
+  back:["← Retour","← Back","← Voltar","← Înapoi","← Назад","← Назад"],
+  cancel:["Annuler","Cancel","Cancelar","Anulează","Отмена","Скасувати"],
+  valuable:["⚠ Objet de valeur : remettez-le directement à la réception, en main propre.","⚠ Valuable item: hand it directly to reception.","⚠ Objeto de valor: entregue-o diretamente na receção.","⚠ Obiect de valoare: predați-l direct la recepție.","⚠ Ценная вещь: отдайте её лично на ресепшн.","⚠ Цінна річ: передайте її особисто на рецепцію."],
+  thanks:["Merci ! Déposez l'objet à la réception.","Thank you! Bring the item to reception.","Obrigado! Leve o objeto à receção.","Mulțumim! Duceți obiectul la recepție.","Спасибо! Отнесите вещь на ресепшн.","Дякуємо! Віднесіть річ на рецепцію."],
+  mine:["Mes objets déclarés","My reported items","Os meus objetos","Obiectele mele","Мои найденные вещи","Мої знайдені речі"],
+  sent:["✓ envoyé","✓ sent","✓ enviado","✓ trimis","✓ отправлено","✓ надіслано"],
+  waiting:["⏳ en attente","⏳ waiting","⏳ por enviar","⏳ în așteptare","⏳ ожидает","⏳ очікує"],
+  pending:["envoi(s) en attente — envoi automatique dès qu'il y a du réseau","waiting — sent automatically when network is back","por enviar — envio automático com rede","în așteptare — trimis automat când revine rețeaua","ожидают отправки — отправятся автоматически при появлении сети","очікують — надішлються автоматично, коли з'явиться мережа"],
+  retry:["Renvoyer","Send again","Reenviar","Retrimite","Отправить снова","Надіслати знову"],
+  name:["Votre prénom","Your first name","O seu primeiro nome","Prenumele dvs.","Ваше имя","Ваше ім'я"],
+  hello:["Bonjour","Hello","Olá","Bună","Здравствуйте","Вітаємо"],
+  change:["changer","change","mudar","schimbă","изменить","змінити"],
+  needStudio:["Choisissez le studio ou l'endroit.","Choose the studio or place.","Escolha o estúdio ou o lugar.","Alegeți studioul sau locul.","Выберите студию или место.","Виберіть студію або місце."],
+  needCat:["Choisissez le type d'objet.","Choose the type of item.","Escolha o tipo de objeto.","Alegeți tipul obiectului.","Выберите тип вещи.","Виберіть тип речі."],
+  none:["Aucun objet déclaré sur ce téléphone.","No item reported on this phone.","Nenhum objeto neste telemóvel.","Niciun obiect pe acest telefon.","На этом телефоне нет найденных вещей.","На цьому телефоні немає знайдених речей."]};
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const isoLocal = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const hex = (n) => [...crypto.getRandomValues(new Uint8Array(n))].map((b) => b.toString(16).padStart(2, "0")).join("");
+const stamp = () => { const d = new Date(); return `${isoLocal(d).replace(/-/g, "")}-${d.toTimeString().slice(0, 8).replace(/:/g, "")}`; };
+let lang = "fr";
+const t = (k) => (T[k] || [k])[LANGS.indexOf(lang)] || T[k][0];
+const lab = (row) => row[1 + LANGS.indexOf(lang)] || row[1];
+function toast(m, bad = false) { const n = document.createElement("div"); n.textContent = m; if (bad) n.className = "bad"; $("#toast").appendChild(n); setTimeout(() => n.remove(), bad ? 6000 : 3500); }
+
+/* ---- stockage local ---- */
+const Store = {
+  db: null,
+  open() { if (this.db) return Promise.resolve(this.db); return new Promise((res, rej) => { const r = indexedDB.open("aabd-objets-trouves", 1); r.onupgradeneeded = () => { const db = r.result; for (const [n, k] of [["kv", "k"], ["outbox", "id"], ["history", "id"]]) if (!db.objectStoreNames.contains(n)) db.createObjectStore(n, { keyPath: k }); }; r.onsuccess = () => { this.db = r.result; res(this.db); }; r.onerror = () => rej(r.error); }); },
+  async tx(st, mode, fn) { const db = await this.open(); return new Promise((res, rej) => { const x = db.transaction(st, mode); const r = fn(x.objectStore(st)); let out; if (r) r.onsuccess = () => { out = r.result; }; x.oncomplete = () => res(out); x.onerror = () => rej(x.error); x.onabort = () => rej(x.error || new Error("Stockage plein")); }); },
+  get(s, k) { return this.tx(s, "readonly", (o) => o.get(k)); }, put(s, v) { return this.tx(s, "readwrite", (o) => o.put(v)); },
+  del(s, k) { return this.tx(s, "readwrite", (o) => o.delete(k)); }, all(s) { return this.tx(s, "readonly", (o) => o.getAll()); },
+};
+async function settings() { const r = await Store.get("kv", "settings"); return { url: "", token: "", name: "", lang: "fr", ...(r ? r.v : {}) }; }
+async function saveSettings(v) { await Store.put("kv", { k: "settings", v }); }
+
+/* ---- relais ---- */
+function parseCode(raw) {
+  const pattern = /AABD-OT\|(https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec)\|([A-Za-z0-9_-]{16,})/;
+  const base = String(raw || "").replace(/[​-‍⁠﻿`"'<>]/g, "").replace(/[｜¦∣]/g, "|");
+  for (const s of [base.replace(/[ \t ]+/g, ""), base.replace(/\s+/g, "")]) { const m = s.match(pattern); if (m) return { url: m[1], token: m[2] }; }
+  return null;
+}
+async function post(body) {
+  const s = await settings();
+  let r;
+  try { r = await fetch(s.url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ ...body, token: s.token }) }); }
+  catch { throw new Error("Pas de réseau / no network"); }
+  const d = await r.json(); if (!d.ok) throw new Error(d.error || "Erreur"); return d;
+}
+let flushing = false;
+async function flush() {
+  if (flushing || !navigator.onLine) return; flushing = true; let sent = 0;
+  try {
+    for (const ev of (await Store.all("outbox")).sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
+      try { await post({ kind: "lost", record: ev.record, photos: ev.photos }); await Store.del("outbox", ev.id); const h = await Store.get("history", ev.id); if (h) { h.sent = true; await Store.put("history", h); } sent++; }
+      catch (e) { ev.lastError = e.message; await Store.put("outbox", ev); break; }
+    }
+  } finally { flushing = false; }
+  if (sent && !draft) home();
+}
+window.addEventListener("online", flush);
+
+/* ---- photo ---- */
+function compress(file) { return new Promise((res, rej) => { const u = URL.createObjectURL(file); const i = new Image(); i.onload = () => { const k = Math.min(1, 1600 / Math.max(i.width, i.height)); const c = document.createElement("canvas"); c.width = Math.round(i.width * k); c.height = Math.round(i.height * k); c.getContext("2d").drawImage(i, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", 0.72)); }; i.onerror = () => { URL.revokeObjectURL(u); rej(new Error("Image ?")); }; i.src = u; }); }
+
+/* ---- écrans ---- */
+let draft = null;
+function langBar(s) {
+  $("#langs").innerHTML = LANGS.map((l) => `<button class="${l === lang ? "on" : ""}" data-lang="${l}">${l.toUpperCase()}</button>`).join("");
+  $("#langs").onclick = async (e) => { const b = e.target.closest("[data-lang]"); if (!b) return; lang = b.dataset.lang; const x = await settings(); x.lang = lang; await saveSettings(x); draft ? step() : home(); };
+  $("#title").textContent = t("title");
+}
+
+async function home() {
+  draft = null;
+  const s = await settings(); lang = s.lang || "fr"; langBar(s);
+  if (!s.url) return setup(s);
+  if (!s.name) return askName(s);
+  const hist = (await Store.all("history")).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 30);
+  const ob = await Store.all("outbox");
+  $("#main").innerHTML = `
+    ${ob.length ? `<div class="banner warn">${ob.length} ${t("pending")}<button class="btn" id="retry" style="margin-top:8px;min-height:44px">${t("retry")}</button></div>` : ""}
+    <p>${t("hello")} <b>${esc(s.name)}</b> · <a href="#" id="chg" class="small">${t("change")}</a></p>
+    <button class="btn primary big" id="go"><span>🔎</span>${t("found")}</button>
+    <div class="card" style="margin-top:14px"><h2>${t("mine")}</h2>
+      ${hist.map((h) => `<div class="item">${h.thumb ? `<img src="${h.thumb}" alt="">` : `<img alt="">`}<div><b>${esc(h.where)}</b><br><span class="small muted">${esc(h.what)} · ${esc(h.date.slice(8, 10) + "/" + h.date.slice(5, 7))} ${esc(h.time)}</span></div><span class="small">${h.sent ? t("sent") : t("waiting")}</span></div>`).join("") || `<p class="muted">${t("none")}</p>`}
+    </div>
+    <p class="small muted" style="text-align:center"><a href="#" id="cfg">Réglages</a> · v${VERSION}</p>`;
+  $("#go").onclick = () => { draft = { n: 1, photo: null, studio: "", area: "", spot: "", cat: "", desc: "" }; step(); };
+  $("#chg").onclick = (e) => { e.preventDefault(); askName(s); };
+  $("#cfg").onclick = (e) => { e.preventDefault(); setup(s); };
+  $("#retry")?.addEventListener("click", flush);
+}
+
+function setup(s) {
+  $("#main").innerHTML = `<div class="card"><h1>Configuration</h1><p class="small">Collez le code reçu par mail (il commence par <b>AABD-OT|</b>).<br><i>Paste the setup code received by e-mail.</i></p>
+    <textarea id="code" rows="4" placeholder="AABD-OT|https://…|…" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    <button class="btn dark" id="save" style="margin-top:10px">Enregistrer / Save</button>
+    ${s.url ? `<p class="small muted">✓ Déjà configuré. <a href="#" id="back">Retour</a></p>` : ""}</div>`;
+  $("#save").onclick = async () => {
+    const c = parseCode($("#code").value);
+    if (!c) return toast("Code incomplet : copiez toute la ligne AABD-OT|…", true);
+    const x = await settings(); x.url = c.url; x.token = c.token; await saveSettings(x);
+    try { await post({ kind: "ping" }); toast("Connexion OK ✓"); } catch (e) { toast("Enregistré, mais test échoué : " + e.message, true); }
+    home();
+  };
+  $("#back")?.addEventListener("click", (e) => { e.preventDefault(); home(); });
+}
+
+function askName(s) {
+  $("#main").innerHTML = `<div class="card"><h1>${t("name")}</h1><input type="text" id="nm" value="${esc(s.name)}" autocomplete="given-name"><button class="btn primary" id="ok" style="margin-top:10px">OK</button></div>`;
+  $("#ok").onclick = async () => { const v = $("#nm").value.trim(); if (!v) return; const x = await settings(); x.name = v; await saveSettings(x); home(); };
+}
+
+function steps(n) { return `<div class="steps">${[1, 2, 3, 4].map((i) => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</div>`; }
+function step() {
+  const d = draft; const m = $("#main");
+  if (d.n === 1) {
+    m.innerHTML = `${steps(1)}<div class="card"><h1>${t("photo")}</h1>
+      ${d.photo ? `<img class="photo" src="${d.photo}" alt="">` : ""}
+      <input type="file" id="cam" accept="image/*" capture="environment" hidden>
+      <button class="btn ${d.photo ? "" : "primary"}" id="shoot" style="margin-top:10px">${d.photo ? t("retake") : t("take")}</button>
+      ${d.photo ? `<button class="btn primary" id="next" style="margin-top:10px">${t("next")}</button>` : `<button class="btn" id="skip" style="margin-top:10px">${t("nophoto")}</button>`}
+      <button class="btn" id="cancel" style="margin-top:10px">${t("cancel")}</button></div>`;
+    $("#shoot").onclick = () => $("#cam").click();
+    $("#cam").onchange = async (e) => { const f = e.target.files[0]; if (!f) return; try { d.photo = await compress(f); step(); } catch (er) { toast(er.message, true); } };
+    $("#next")?.addEventListener("click", () => { d.n = 2; step(); });
+    $("#skip")?.addEventListener("click", () => { d.n = 2; step(); });
+    $("#cancel").onclick = () => home();
+  } else if (d.n === 2) {
+    m.innerHTML = `${steps(2)}<div class="card"><h1>${t("where")}</h1>
+      ${Object.entries(STUDIOS).reverse().map(([f, list]) => `<div class="floor">${t("floor")} ${f}</div><div class="tiles">${list.map((s) => `<button class="tile ${d.studio === String(s) ? "on" : ""}" data-st="${s}">${s}</button>`).join("")}</div>`).join("")}
+      <div class="floor">${t("other")}</div><div class="row2" style="margin-top:4px">${AREAS.map((a) => `<button class="choice ${d.area === a ? "on" : ""}" data-area="${esc(a)}" style="min-height:52px">${esc(a)}</button>`).join("")}</div>
+      ${d.studio ? `<h2 style="margin-top:14px">${t("spot")}</h2><div class="grid3">${SPOTS.map((sp) => `<button class="choice ${d.spot === sp[1] ? "on" : ""}" data-spot="${esc(sp[1])}"><span>${sp[0]}</span>${esc(lab(sp))}</button>`).join("")}</div>` : ""}
+      <div class="row2" style="margin-top:14px"><button class="btn" id="back">${t("back")}</button><button class="btn primary" id="next">${t("next")}</button></div></div>`;
+    m.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { d.studio = b.dataset.st; d.area = ""; step(); setTimeout(() => m.querySelector("h2")?.scrollIntoView({ behavior: "smooth" }), 50); }));
+    m.querySelectorAll("[data-area]").forEach((b) => (b.onclick = () => { d.area = b.dataset.area; d.studio = ""; d.spot = ""; step(); }));
+    m.querySelectorAll("[data-spot]").forEach((b) => (b.onclick = () => { d.spot = b.dataset.spot; step(); }));
+    $("#back").onclick = () => { d.n = 1; step(); };
+    $("#next").onclick = () => { if (!d.studio && !d.area) return toast(t("needStudio"), true); d.n = 3; step(); };
+  } else if (d.n === 3) {
+    m.innerHTML = `${steps(3)}<div class="card"><h1>${t("what")}</h1>
+      <div class="grid3">${CATS.map((c) => `<button class="choice ${d.cat === c[1] ? "on" : ""}" data-cat="${esc(c[1])}"><span>${c[0]}</span>${esc(lab(c))}</button>`).join("")}</div>
+      <label class="f" style="margin-top:12px">${t("desc")}<input type="text" id="desc" value="${esc(d.desc)}"></label>
+      <div class="row2"><button class="btn" id="back">${t("back")}</button><button class="btn primary" id="next">${t("next")}</button></div></div>`;
+    m.querySelectorAll("[data-cat]").forEach((b) => (b.onclick = () => { d.cat = b.dataset.cat; d.desc = $("#desc").value; step(); }));
+    $("#desc").oninput = (e) => { d.desc = e.target.value; };
+    $("#back").onclick = () => { d.n = 2; step(); };
+    $("#next").onclick = () => { if (!d.cat) return toast(t("needCat"), true); d.n = 4; step(); };
+  } else {
+    const cat = CATS.find((c) => c[1] === d.cat); const sp = SPOTS.find((x) => x[1] === d.spot);
+    m.innerHTML = `${steps(4)}<div class="card"><h1>${t("check")}</h1>
+      ${d.photo ? `<img class="photo" src="${d.photo}" alt="">` : ""}
+      <p style="font-size:1.1rem"><b>${d.studio ? t("studio") + " " + esc(d.studio) : esc(d.area)}</b>${sp ? " · " + sp[0] + " " + esc(lab(sp)) : ""}<br>${cat[0]} ${esc(lab(cat))}${d.desc ? " — " + esc(d.desc) : ""}</p>
+      ${VALUABLE.has(d.cat) ? `<div class="banner bad">${t("valuable")}</div>` : ""}
+      <button class="btn primary" id="send">${t("send")}</button>
+      <button class="btn" id="back" style="margin-top:10px">${t("back")}</button></div>`;
+    $("#back").onclick = () => { d.n = 3; step(); };
+    $("#send").onclick = send;
+  }
+}
+
+async function send() {
+  const d = draft, s = await settings();
+  $("#send").disabled = true;
+  const now = new Date(), date = isoLocal(now), time = now.toTimeString().slice(0, 5);
+  const id = `O${date.replace(/-/g, "")}-${stamp().slice(9)}-${hex(2)}`;
+  const photoName = `P${stamp()}-${hex(3)}.jpg`;
+  const record = { id, app: "objets", date, time, location: d.studio || d.area, studio: d.studio, spot: d.spot, category: d.cat,
+    valuable: VALUABLE.has(d.cat), description: d.desc.trim(), descriptionOriginal: d.desc.trim(), foundBy: s.name, lang,
+    comment: d.spot ? "Endroit : " + d.spot : "", photos: d.photo ? [photoName] : [], createdAt: now.toISOString(), appVersion: VERSION };
+  const photos = d.photo ? [{ name: photoName, data: d.photo.split(",")[1] }] : [];
+  const cat = CATS.find((c) => c[1] === d.cat);
+  // vignette légère pour la liste « Mes objets »
+  let thumb = "";
+  if (d.photo) { const i = new Image(); i.src = d.photo; await i.decode().catch(() => {}); const c = document.createElement("canvas"); c.width = c.height = 104; const k = Math.max(104 / i.width, 104 / i.height); c.getContext("2d").drawImage(i, (104 - i.width * k) / 2, (104 - i.height * k) / 2, i.width * k, i.height * k); thumb = c.toDataURL("image/jpeg", 0.6); }
+  try {
+    await Store.put("outbox", { id, record, photos, createdAt: record.createdAt });
+    await Store.put("history", { id, createdAt: record.createdAt, date, time, where: d.studio ? `${t("studio")} ${d.studio}` : d.area, what: lab(cat) + (d.desc ? " — " + d.desc : ""), thumb, sent: false });
+  } catch (e) { $("#send").disabled = false; return toast("Erreur stockage : " + e.message, true); }
+  draft = null;
+  $("#main").innerHTML = `<div class="card" style="text-align:center"><div style="font-size:3.5rem">✅</div><h1>${t("thanks")}</h1>
+    ${record.valuable ? `<div class="banner bad">${t("valuable")}</div>` : ""}
+    <button class="btn primary" id="again" style="margin-top:10px">${t("found")}</button><button class="btn" id="home" style="margin-top:10px">OK</button></div>`;
+  $("#again").onclick = () => { draft = { n: 1, photo: null, studio: "", area: "", spot: "", cat: "", desc: "" }; step(); };
+  $("#home").onclick = () => home();
+  flush();
+}
+
+(async function start() {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch { /* facultatif */ }
+  await home(); flush(); setInterval(flush, 60000);
+})();
+</script>
+</body>
+</html>
