@@ -89,7 +89,7 @@ table{width:100%;border-collapse:collapse;font-size:.88rem}td{padding:6px 4px;bo
 "use strict";
 /* Contrôle qualité studios & communs — app GSM (PWA). Données de travail dans le téléphone (IndexedDB),
    envoi au relais Google Apps Script (Sheet + Drive), lu ensuite par l'exe du PC. */
-const VERSION = "1.0.0";
+const VERSION = "1.0.1";
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -191,6 +191,23 @@ function computeScore(zones, items) {
 }
 
 /* ---------------- relais Google ---------------- */
+/** Lit le code « AABD-CQ|url|jeton » même abîmé par un copier-coller sur GSM
+    (retours à la ligne, espaces, caractères invisibles, texte autour, barre verticale pleine chasse). */
+function parseConfigCode(raw) {
+  const pattern = /AABD-CQ\|(https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec)\|([A-Za-z0-9_-]{16,})/;
+  const base = String(raw || "").replace(/[​-‍⁠﻿`"'<>]/g, "").replace(/[｜¦∣]/g, "|");
+  // 1re passe : on garde les retours à la ligne (le texte du mail après le code ne se colle pas au jeton) ;
+  // 2e passe : tout recollé (Gmail coupe parfois la longue adresse en plein milieu).
+  for (const s of [base.replace(/[ \t ]+/g, ""), base.replace(/\s+/g, "")]) {
+    const m = s.match(pattern);
+    if (m) return { url: m[1], token: m[2] };
+  }
+  const s = base.replace(/\s+/g, "");
+  if (!s) return { error: "Collez le code reçu par mail." };
+  if (!/AABD-CQ/.test(s)) return { error: "Code incomplet : il doit commencer par AABD-CQ| (copiez toute la ligne du mail)." };
+  if (!/\/exec\|/.test(s)) return { error: "Code incomplet : l'adresse du relais (…/exec) est coupée. Copiez toute la ligne." };
+  return { error: "Code incomplet : le jeton (après le dernier |) manque. Copiez toute la ligne." };
+}
 async function relayGet(params) {
   const s = await settings();
   if (!s.url) throw new Error("Relais non configuré (Réglages).");
@@ -517,7 +534,7 @@ async function pageSettings() {
       <div class="list">${s.controllers.map((n) => `<div class="row"><button class="chip ${n === s.controller ? "on" : ""}" data-pick="${esc(n)}">${esc(n)}</button><button class="btn small danger" data-del="${esc(n)}">Retirer</button></div>`).join("") || '<p class="muted small">Aucun nom.</p>'}</div>
       <label class="f" style="margin-top:10px">Ajouter un nom<input type="text" id="addN" placeholder="Prénom Nom"></label><button class="btn" id="addBtn">Ajouter</button></div>
     <div class="card"><h2>Liaison au registre</h2>
-      <label class="f">Code de configuration (reçu par mail)<input type="text" id="code" placeholder="AABD-CQ|https://…|…"></label>
+      <label class="f">Code de configuration (reçu par mail)<textarea id="code" rows="4" placeholder="AABD-CQ|https://…|…" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea></label>
       <div class="btns"><button class="btn dark" id="apply">Enregistrer</button><button class="btn" id="test">Tester la connexion</button></div>
       <p class="small muted">${s.url ? "✓ Relais configuré." : "Relais non configuré."}</p>
       <p class="small">${ob.length ? `<b>${ob.length} envoi(s) en attente</b> <button class="btn small" id="retry2">Renvoyer</button>` : "Aucun envoi en attente."}</p></div>
@@ -526,9 +543,9 @@ async function pageSettings() {
   $$("[data-del]").forEach((b) => (b.onclick = async () => { s.controllers = s.controllers.filter((n) => n !== b.dataset.del); if (s.controller === b.dataset.del) s.controller = ""; await saveSettings(s); route(); }));
   $("#addBtn").onclick = async () => { const n = $("#addN").value.trim(); if (!n) return; if (!s.controllers.includes(n)) s.controllers.push(n); s.controller ||= n; await saveSettings(s); route(); };
   $("#apply").onclick = async () => {
-    const parts = $("#code").value.trim().split("|");
-    if (parts.length !== 3 || parts[0] !== "AABD-CQ" || !/^https:\/\/script\.google\.com\//.test(parts[1])) return toast("Code de configuration non reconnu.", true);
-    s.url = parts[1]; s.token = parts[2]; await saveSettings(s); toast("Configuration enregistrée."); await refreshState(); route();
+    const cfg = parseConfigCode($("#code").value);
+    if (cfg.error) return toast(cfg.error, true);
+    s.url = cfg.url; s.token = cfg.token; await saveSettings(s); toast("Configuration enregistrée."); await refreshState(); route();
   };
   $("#test").onclick = async () => {
     try { const r = await relayPost({ kind: "ping" }); toast(`Connexion OK (${r.account || "relais"}).`); await refreshState(); }

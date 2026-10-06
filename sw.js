@@ -1,6 +1,6 @@
 // Service worker — Contrôle qualité AABD (GSM)
 // Changer CACHE à chaque publication pour forcer la mise à jour des fichiers.
-const CACHE = 'aabd-controle-qualite-v1.0.0';
+const CACHE = 'aabd-controle-qualite-v1.0.1';
 const SHELL = ['./', './index.html', './donnees.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
